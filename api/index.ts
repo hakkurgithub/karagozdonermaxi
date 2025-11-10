@@ -25,10 +25,10 @@ app.use(express.json({ limit: '10mb' }));
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Karagöz Backend is running!',
+    message: 'Karagöz Backend is running on Vercel!',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV || 'production'
   });
 });
 
@@ -38,7 +38,7 @@ app.post('/api/auth/login', (req, res) => {
   
   if (username === 'admin' && password === 'karagoz2024') {
     res.json({
-      token: 'demo-token',
+      token: 'demo-token-vercel',
       user: {
         id: '1',
         username: 'admin',
@@ -56,18 +56,27 @@ app.get('/api/menu', (req, res) => {
     items: [
       {
         id: 'demo-1',
-        name: 'Demo Kebap',
+        name: 'Adana Kebap',
         price: 4500,
-        description: 'Demo menü öğesi',
+        description: 'Geleneksel Adana kebabı - Vercel API',
         category: 'Kebapok és Grillek',
-        image: 'https://via.placeholder.com/300',
+        image: 'https://raw.githubusercontent.com/hakkurgithub/images/main/adana-kebap.jpg',
         rating: 5
+      },
+      {
+        id: 'demo-2',
+        name: 'Döner Kebap',
+        price: 3500,
+        description: 'Klasik döner kebap - Vercel API',
+        category: 'Döner',
+        image: 'https://raw.githubusercontent.com/hakkurgithub/images/main/doner-kebap.jpg',
+        rating: 4.5
       }
     ],
     pagination: {
       current: 1,
       total: 1,
-      count: 1
+      count: 2
     }
   });
 });
