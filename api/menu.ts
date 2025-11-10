@@ -1,12 +1,13 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Octokit } from '@octokit/rest';
+import { requireAuth, AuthenticatedRequest } from './auth';
 
 // GitHub token'ı environment variable'dan al
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'hakkurgithub';
 const REPO_NAME = 'karagozdonermaxi';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: AuthenticatedRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -83,8 +84,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
-      // İmport endpoint'i
+      // İmport endpoint'i - Authentication gerekli
       if (pathSegments[0] === 'import') {
+        if (!requireAuth(req, res)) return;
+        
         return res.status(200).json({
           success: true,
           message: 'Mevcut menü verileri başarıyla içe aktarıldı',
@@ -92,8 +95,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      // Sync endpoint'i
+      // Sync endpoint'i - Authentication gerekli
       if (pathSegments[0] === 'sync') {
+        if (!requireAuth(req, res)) return;
+        
         if (GITHUB_TOKEN) {
           return res.status(200).json({
             success: true,
@@ -109,14 +114,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      // Yeni menü öğesi oluştur
+      // Yeni menü öğesi oluştur - Authentication gerekli
+      if (!requireAuth(req, res)) return;
+      
       const menuItem = req.body;
-      console.log('New menu item:', menuItem);
+      console.log('New menu item by:', req.user?.username, menuItem);
       
       // GitHub'a otomatik kaydet
       if (GITHUB_TOKEN) {
         try {
-          await saveToGitHub(menuItem, 'add');
+          await saveToGitHub(menuItem, 'add', req.user);
           console.log('✅ GitHub kaydı başarılı');
         } catch (error) {
           console.error('❌ GitHub kaydı başarısız:', error);
@@ -137,14 +144,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'PUT') {
-      // Menü öğesini güncelle
+      // Menü öğesini güncelle - Authentication gerekli
+      if (!requireAuth(req, res)) return;
+      
       const menuItem = req.body;
-      console.log('Update menu item:', menuItemId, menuItem);
+      console.log('Update menu item by:', req.user?.username, menuItemId, menuItem);
       
       // GitHub'a otomatik kaydet
       if (GITHUB_TOKEN) {
         try {
-          await saveToGitHub(menuItem, 'update');
+          await saveToGitHub(menuItem, 'update', req.user);
           console.log('✅ GitHub güncellemesi başarılı');
         } catch (error) {
           console.error('❌ GitHub güncellemesi başarısız:', error);
@@ -163,13 +172,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'DELETE') {
-      // Menü öğesini sil
-      console.log('Delete menu item:', menuItemId);
+      // Menü öğesini sil - Authentication gerekli
+      if (!requireAuth(req, res)) return;
+      
+      console.log('Delete menu item by:', req.user?.username, menuItemId);
       
       // GitHub'a otomatik kaydet
       if (GITHUB_TOKEN) {
         try {
-          await saveToGitHub({ id: menuItemId }, 'delete');
+          await saveToGitHub({ id: menuItemId }, 'delete', req.user);
           console.log('✅ GitHub silme işlemi başarılı');
         } catch (error) {
           console.error('❌ GitHub silme işlemi başarısız:', error);
@@ -196,7 +207,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 // GitHub'a otomatik kayıt fonksiyonu
-async function saveToGitHub(menuItem: any, action: 'add' | 'update' | 'delete') {
+async function saveToGitHub(menuItem: any, action: 'add' | 'update' | 'delete', user?: { username: string }) {
   if (!GITHUB_TOKEN) {
     throw new Error('GitHub token bulunamadı');
   }
@@ -208,17 +219,18 @@ async function saveToGitHub(menuItem: any, action: 'add' | 'update' | 'delete') 
   try {
     // Commit mesajını oluştur
     const timestamp = new Date().toLocaleString('tr-TR');
+    const username = user?.username || 'system';
     let commitMessage = '';
     
     switch (action) {
       case 'add':
-        commitMessage = `🍽️ Admin Panel: Yeni menü öğesi eklendi - ${menuItem.name} (${timestamp})`;
+        commitMessage = `🍽️ Admin Panel: Yeni menü öğesi eklendi - ${menuItem.name} (${username} - ${timestamp})`;
         break;
       case 'update':
-        commitMessage = `✏️ Admin Panel: Menü öğesi güncellendi - ${menuItem.name} (${timestamp})`;
+        commitMessage = `✏️ Admin Panel: Menü öğesi güncellendi - ${menuItem.name} (${username} - ${timestamp})`;
         break;
       case 'delete':
-        commitMessage = `🗑️ Admin Panel: Menü öğesi silindi - ID: ${menuItem.id} (${timestamp})`;
+        commitMessage = `🗑️ Admin Panel: Menü öğesi silindi - ID: ${menuItem.id} (${username} - ${timestamp})`;
         break;
     }
 

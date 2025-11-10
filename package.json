@@ -4,9 +4,11 @@
   "private": true,
   "dependencies": {
     "@octokit/rest": "^22.0.1",
+    "@types/jsonwebtoken": "^9.0.10",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
