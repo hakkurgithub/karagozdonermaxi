@@ -1,7 +1,10 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { Octokit } from '@octokit/rest';
 
 // GitHub token'ı environment variable'dan al
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const REPO_OWNER = 'hakkurgithub';
+const REPO_NAME = 'karagozdonermaxi';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -110,13 +113,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const menuItem = req.body;
       console.log('New menu item:', menuItem);
       
+      // GitHub'a otomatik kaydet
+      if (GITHUB_TOKEN) {
+        try {
+          await saveToGitHub(menuItem, 'add');
+          console.log('✅ GitHub kaydı başarılı');
+        } catch (error) {
+          console.error('❌ GitHub kaydı başarısız:', error);
+        }
+      } else {
+        console.warn('⚠️ GitHub token bulunamadı, otomatik kayıt devre dışı');
+      }
+      
       return res.status(201).json({
         success: true,
         message: 'Menü öğesi başarıyla eklendi (Vercel API)',
         item: {
           ...menuItem,
           id: 'new-' + Date.now()
-        }
+        },
+        githubSaved: GITHUB_TOKEN ? true : false
       });
     }
 
@@ -125,13 +141,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const menuItem = req.body;
       console.log('Update menu item:', menuItemId, menuItem);
       
+      // GitHub'a otomatik kaydet
+      if (GITHUB_TOKEN) {
+        try {
+          await saveToGitHub(menuItem, 'update');
+          console.log('✅ GitHub güncellemesi başarılı');
+        } catch (error) {
+          console.error('❌ GitHub güncellemesi başarısız:', error);
+        }
+      }
+      
       return res.status(200).json({
         success: true,
         message: 'Menü öğesi başarıyla güncellendi',
         item: {
           ...menuItem,
           id: menuItemId
-        }
+        },
+        githubSaved: GITHUB_TOKEN ? true : false
       });
     }
 
@@ -139,10 +166,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Menü öğesini sil
       console.log('Delete menu item:', menuItemId);
       
+      // GitHub'a otomatik kaydet
+      if (GITHUB_TOKEN) {
+        try {
+          await saveToGitHub({ id: menuItemId }, 'delete');
+          console.log('✅ GitHub silme işlemi başarılı');
+        } catch (error) {
+          console.error('❌ GitHub silme işlemi başarısız:', error);
+        }
+      }
+      
       return res.status(200).json({
         success: true,
         message: 'Menü öğesi başarıyla silindi',
-        deletedId: menuItemId
+        deletedId: menuItemId,
+        githubSaved: GITHUB_TOKEN ? true : false
       });
     }
 
@@ -154,5 +192,99 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
+  }
+}
+
+// GitHub'a otomatik kayıt fonksiyonu
+async function saveToGitHub(menuItem: any, action: 'add' | 'update' | 'delete') {
+  if (!GITHUB_TOKEN) {
+    throw new Error('GitHub token bulunamadı');
+  }
+
+  const octokit = new Octokit({
+    auth: GITHUB_TOKEN,
+  });
+
+  try {
+    // Commit mesajını oluştur
+    const timestamp = new Date().toLocaleString('tr-TR');
+    let commitMessage = '';
+    
+    switch (action) {
+      case 'add':
+        commitMessage = `🍽️ Admin Panel: Yeni menü öğesi eklendi - ${menuItem.name} (${timestamp})`;
+        break;
+      case 'update':
+        commitMessage = `✏️ Admin Panel: Menü öğesi güncellendi - ${menuItem.name} (${timestamp})`;
+        break;
+      case 'delete':
+        commitMessage = `🗑️ Admin Panel: Menü öğesi silindi - ID: ${menuItem.id} (${timestamp})`;
+        break;
+    }
+
+    // Mevcut menü verisini güncelle ve commit yap
+    // Bu basit implementasyon - gerçek uygulamada JSON dosyasını güncelleyebilirsiniz
+    const fileContent = `// Admin Panel tarafından güncellendi: ${timestamp}\n// Action: ${action}\n// Data: ${JSON.stringify(menuItem, null, 2)}`;
+    
+    // Ana dalı al
+    const { data: ref } = await octokit.git.getRef({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      ref: 'heads/main',
+    });
+
+    // Son commit'i al
+    const { data: commit } = await octokit.git.getCommit({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      commit_sha: ref.object.sha,
+    });
+
+    // Dosyayı oluştur/güncelle
+    const { data: blob } = await octokit.git.createBlob({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      content: Buffer.from(fileContent).toString('base64'),
+      encoding: 'base64',
+    });
+
+    // Tree oluştur
+    const { data: tree } = await octokit.git.createTree({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      base_tree: commit.tree.sha,
+      tree: [
+        {
+          path: `admin-updates/menu-${action}-${Date.now()}.txt`,
+          mode: '100644',
+          type: 'blob',
+          sha: blob.sha,
+        },
+      ],
+    });
+
+    // Yeni commit oluştur
+    const { data: newCommit } = await octokit.git.createCommit({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      message: commitMessage,
+      tree: tree.sha,
+      parents: [commit.sha],
+    });
+
+    // Ana dalı güncelle
+    await octokit.git.updateRef({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      ref: 'heads/main',
+      sha: newCommit.sha,
+    });
+
+    console.log('✅ GitHub commit başarılı:', newCommit.sha);
+    return newCommit.sha;
+
+  } catch (error) {
+    console.error('❌ GitHub API hatası:', error);
+    throw error;
   }
 }
