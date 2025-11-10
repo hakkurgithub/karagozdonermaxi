@@ -12,59 +12,46 @@ function App() {
   const [currentPage, setCurrentPage] = useState('menu');
 
   useEffect(() => {
-    // URL'yi kontrol et
-    const path = window.location.pathname;
-    if (path === '/contact') {
-      setCurrentPage('contact');
-    } else if (path === '/cart') {
-      setCurrentPage('cart');
-    } else if (path === '/admin') {
-      setCurrentPage('admin-login');
-    } else if (path === '/admin/dashboard') {
-      setCurrentPage('admin-dashboard');
-    } else if (path === '/admin/menu') {
-      setCurrentPage('admin-menu');
-    } else {
-      setCurrentPage('menu');
-    }
-
-    // Browser back/forward butonları için
-    const handlePopState = () => {
-      const path = window.location.pathname;
-      if (path === '/contact') {
+    // Hash-based routing için URL'yi kontrol et
+    const updateFromHash = () => {
+      const hash = window.location.hash.slice(1); // # karakterini kaldır
+      if (hash === 'contact') {
         setCurrentPage('contact');
-      } else if (path === '/cart') {
+      } else if (hash === 'cart') {
         setCurrentPage('cart');
-      } else if (path === '/admin') {
+      } else if (hash === 'admin') {
         setCurrentPage('admin-login');
-      } else if (path === '/admin/dashboard') {
+      } else if (hash === 'admin/dashboard') {
         setCurrentPage('admin-dashboard');
-      } else if (path === '/admin/menu') {
+      } else if (hash === 'admin/menu') {
         setCurrentPage('admin-menu');
       } else {
         setCurrentPage('menu');
       }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    updateFromHash();
+
+    // Hash değişikliklerini dinle
+    window.addEventListener('hashchange', updateFromHash);
+    return () => window.removeEventListener('hashchange', updateFromHash);
   }, []);
 
-  // Sayfa değiştirme fonksiyonu
+  // Sayfa değiştirme fonksiyonu - Hash-based routing
   const navigateTo = useCallback((page: string) => {
     setCurrentPage(page);
     if (page === 'contact') {
-      window.history.pushState(null, '', '/contact');
+      window.location.hash = '#contact';
     } else if (page === 'cart') {
-      window.history.pushState(null, '', '/cart');
+      window.location.hash = '#cart';
     } else if (page === 'admin-login') {
-      window.history.pushState(null, '', '/admin');
+      window.location.hash = '#admin';
     } else if (page === 'admin-dashboard') {
-      window.history.pushState(null, '', '/admin/dashboard');
+      window.location.hash = '#admin/dashboard';
     } else if (page === 'admin-menu') {
-      window.history.pushState(null, '', '/admin/menu');
+      window.location.hash = '#admin/menu';
     } else {
-      window.history.pushState(null, '', '/');
+      window.location.hash = '#menu';
     }
   }, []);
 
@@ -80,7 +67,7 @@ function App() {
       ) : currentPage === 'cart' ? (
         <CartPage />
       ) : currentPage === 'admin-login' ? (
-        <AdminLogin />
+        <AdminLogin onLoginSuccess={() => navigateTo('admin-dashboard')} />
       ) : currentPage === 'admin-dashboard' ? (
         <AdminDashboard />
       ) : currentPage === 'admin-menu' ? (

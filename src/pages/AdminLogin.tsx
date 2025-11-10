@@ -6,7 +6,11 @@ interface LoginFormData {
   password: string;
 }
 
-const AdminLogin: React.FC = () => {
+interface AdminLoginProps {
+  onLoginSuccess: () => void;
+}
+
+const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
   const [formData, setFormData] = useState<LoginFormData>({
     username: '',
     password: ''
@@ -35,9 +39,9 @@ const AdminLogin: React.FC = () => {
         const adminToken = btoa(`${formData.username}:${Date.now()}`);
         localStorage.setItem('adminToken', adminToken);
         localStorage.setItem('adminUsername', formData.username);
-        
+
         // Admin paneline yönlendir
-        (window as any).navigateTo('admin-dashboard');
+        onLoginSuccess();
       } else {
         setError('Geçersiz kullanıcı adı veya şifre!');
       }
