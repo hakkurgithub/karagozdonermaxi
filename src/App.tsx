@@ -27,7 +27,11 @@ function App() {
       } else if (hash === 'admin/menu') {
         setCurrentPage('admin-menu');
       } else {
+        // Hash yoksa veya bilinmeyen hash ise menu sayfasına yönlendir
         setCurrentPage('menu');
+        if (!hash) {
+          window.location.hash = '#menu';
+        }
       }
     };
 
