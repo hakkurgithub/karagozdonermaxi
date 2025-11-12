@@ -23,6 +23,7 @@ export interface MenuItem {
   category: MenuCategory;
   image: string;
   rating: number;
+  isActive?: boolean;
   isAvailable?: boolean;
   spiceLevel?: 1 | 2 | 3 | 4 | 5;
   isPopular?: boolean;

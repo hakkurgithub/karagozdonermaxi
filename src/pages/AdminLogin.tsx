@@ -65,7 +65,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
             <div className="bg-white p-4 rounded-full shadow-lg">
               <img 
                 src="/logo.svg" 
-                alt="Karagöz Döner Maxi Logo" 
+                alt="Karagöz Döner Logo" 
                 className="w-16 h-16"
               />
             </div>
@@ -74,7 +74,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
             Yönetim Paneli
           </h2>
           <p className="text-gray-400">
-            Karagöz Döner Maxi Admin Girişi
+            Karagöz Döner Admin Girişi
           </p>
         </div>
 

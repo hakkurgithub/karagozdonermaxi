@@ -10,6 +10,7 @@ interface MenuFormData {
   category: MenuCategory;
   image: string;
   rating: number;
+  isActive: boolean;
 }
 
 const AdminMenuManagement: React.FC = () => {
@@ -25,7 +26,8 @@ const AdminMenuManagement: React.FC = () => {
     price: 0,
     category: "Kebapok és Grillek",
     image: '',
-    rating: 4.0
+    rating: 4.0,
+    isActive: true
   });
 
   useEffect(() => {
@@ -103,7 +105,8 @@ const AdminMenuManagement: React.FC = () => {
       price: item.price,
       category: item.category,
       image: item.image,
-      rating: item.rating
+      rating: item.rating,
+      isActive: item.isActive ?? true
     });
     setIsFormOpen(true);
   };
@@ -114,6 +117,14 @@ const AdminMenuManagement: React.FC = () => {
     }
   };
 
+  const handleToggleStatus = (id: string) => {
+    setMenuItems(prev => prev.map(item =>
+      item.id === id
+        ? { ...item, isActive: !item.isActive }
+        : item
+    ));
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -121,7 +132,8 @@ const AdminMenuManagement: React.FC = () => {
       price: 0,
       category: "Kebapok és Grillek",
       image: '',
-      rating: 4.0
+      rating: 4.0,
+      isActive: true
     });
     setEditingItem(null);
     setIsFormOpen(false);
@@ -231,13 +243,14 @@ const AdminMenuManagement: React.FC = () => {
                   <th className="text-left py-3 px-4">Kategori</th>
                   <th className="text-left py-3 px-4">Fiyat</th>
                   <th className="text-left py-3 px-4">Puan</th>
+                  <th className="text-left py-3 px-4">Durum</th>
                   <th className="text-left py-3 px-4">İşlemler</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                    <td colSpan={6} className="text-center py-8 text-gray-500">
                       {searchTerm || filterCategory !== 'all' 
                         ? 'Arama kriterlerine uygun ürün bulunamadı.' 
                         : 'Henüz ürün eklenmemiş.'}
@@ -269,6 +282,18 @@ const AdminMenuManagement: React.FC = () => {
                         <span className="flex items-center gap-1">
                           ⭐ {item.rating}
                         </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => handleToggleStatus(item.id)}
+                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                            item.isActive !== false
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'bg-red-100 text-red-700 hover:bg-red-200'
+                          }`}
+                        >
+                          {item.isActive !== false ? '✅ Aktif' : '❌ Pasif'}
+                        </button>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex gap-2">
@@ -410,6 +435,35 @@ const AdminMenuManagement: React.FC = () => {
                     title="Ürün Puanı (1-5)"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    📊 Ürün Durumu
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="isActive"
+                        checked={formData.isActive}
+                        onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                        className="sr-only"
+                      />
+                      <div className={`relative w-12 h-6 rounded-full transition-colors ${
+                        formData.isActive ? 'bg-green-500' : 'bg-gray-300'
+                      }`}>
+                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                          formData.isActive ? 'translate-x-6' : 'translate-x-0.5'
+                        }`}></div>
+                      </div>
+                      <span className={`ml-3 text-sm font-medium ${
+                        formData.isActive ? 'text-green-700' : 'text-gray-500'
+                      }`}>
+                        {formData.isActive ? '✅ Aktif (Menüde görünür)' : '❌ Pasif (Menüde gizli)'}
+                      </span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">

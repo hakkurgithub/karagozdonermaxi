@@ -14,7 +14,8 @@ export const useMenu = () => {
   }, []);
 
   const filteredItems = useMemo(() => {
-    let items = [...MENU_ITEMS];
+    // Start with active items only
+    let items = MENU_ITEMS.filter(item => item.isActive !== false);
 
     // Filter by category
     if (selectedCategory !== 'all') {

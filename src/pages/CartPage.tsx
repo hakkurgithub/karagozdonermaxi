@@ -1,6 +1,6 @@
 // pages/CartPage.tsx
 import React, { useState } from 'react';
-import { useCart } from '../hooks/useCart';
+import { useCart } from '../context/CartContext';
 
 type FormData = { 
   address: string; 
@@ -30,6 +30,8 @@ const CartPage: React.FC = () => {
 
   // WhatsApp sipariş gönderme fonksiyonu
   const sendOrderToWhatsApp = (address?: string, phone?: string) => {
+    console.log('📱 WhatsApp mesajı hazırlanıyor...');
+    
     const orderItemsText = cartItems
       .map(
         (item) =>
@@ -39,27 +41,46 @@ const CartPage: React.FC = () => {
 
     const totalPriceText = `\n\nVégösszeg: ${getTotalPrice().toFixed(0)} Ft`;
     
-    let message = `Helló! A Karagöz Döner Maxi-tól szeretnék rendelni:\n\n${orderItemsText}${totalPriceText}`;
+    let message = `Helló! A Karagöz Döner-től szeretnék rendelni:\n\n${orderItemsText}${totalPriceText}`;
 
     if (address) message += `\n\nCím: ${address}`;
     if (phone) message += `\nTelefonszám: ${phone}`;
     message += `\n\nFizetési mód: ${form.payment}`;
 
+    console.log('📋 Hazırlanan mesaj:', message);
+
     const phoneNumber = '36209341537';
     const encodedMessage = encodeURIComponent(message);
     const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    console.log('🔗 WhatsApp URL:', url);
+    console.log('🚀 WhatsApp penceresi açılıyor...');
     
     window.open(url, '_blank');
   };
 
   const handleCheckout = () => {
-    if (cartItems.length === 0) return;
+    console.log('🔍 Checkout başlatıldı');
+    console.log('📦 Sepet öğeleri:', cartItems);
+    console.log('📋 Form verileri:', form);
+    
+    if (cartItems.length === 0) {
+      console.log('❌ Sepet boş');
+      alert('Sepetiniz boş! Lütfen önce ürün ekleyin.');
+      return;
+    }
+    
     if (!form.address || !form.phone) {
+      console.log('❌ Form eksik:', { address: form.address, phone: form.phone });
       alert('Kérjük töltse ki az összes kötelező mezőt!');
       return;
     }
+    
+    console.log('✅ WhatsApp mesajı gönderiliyor...');
     sendOrderToWhatsApp(form.address, form.phone);
+    console.log('🧹 Sepet temizleniyor...');
     clearCart();
+    console.log('✅ Sipariş tamamlandı!');
     alert('Rendelését elküldtük WhatsApp-on! Köszönjük!');
   };
 
@@ -75,7 +96,7 @@ const CartPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4 mb-4">
             <img 
               src="/logo.svg" 
-              alt="Karagöz Döner Maxi Logo" 
+              alt="Karagöz Döner Logo" 
               className="w-16 h-16 md:w-20 md:h-20"
             />
             <div>
@@ -83,7 +104,7 @@ const CartPage: React.FC = () => {
                 Kosaram
               </h1>
               <p className="text-xl opacity-90">
-                Karagöz Döner Maxi
+                Karagöz Döner
               </p>
             </div>
           </div>

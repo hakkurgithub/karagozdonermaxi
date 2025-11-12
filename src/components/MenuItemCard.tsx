@@ -9,10 +9,16 @@ interface MenuItemCardProps {
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart, className = '' }) => {
+  const handleAddToCart = () => {
+    console.log('🛒 Ürün sepete ekleniyor:', item.name, item.price + ' Ft');
+    onAddToCart(item);
+    console.log('✅ Sepete ekleme işlemi tamamlandı');
+  };
+
   return (
     <div 
       className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-2 ${className}`}
-      onClick={() => onAddToCart(item)}
+      onClick={handleAddToCart}
     >
       <div className="relative overflow-hidden">
         <img
@@ -21,7 +27,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onAddToCart, classNam
           className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = 'https://via.placeholder.com/300x200/667eea/ffffff?text=Karagöz+Döner+Maxi';
+            target.src = 'https://via.placeholder.com/300x200/667eea/ffffff?text=Karagöz+Döner';
           }}
         />
         <div className="absolute top-3 left-3">

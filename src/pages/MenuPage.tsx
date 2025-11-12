@@ -1,7 +1,7 @@
 // pages/MenuPage.tsx
 import React, { useState } from 'react';
 import { useMenu } from '../hooks/useMenu';
-import { useCart } from '../hooks/useCart';
+import { useCart } from '../context/CartContext';
 import MenuItemCard from '../components/MenuItemCard';
 import CategoryFilter from '../components/CategoryFilter';
 import Cart from '../components/Cart';
@@ -35,9 +35,12 @@ const MenuPage: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
 
   const handleAddToCart = (item: MenuItem) => {
+    console.log('🏪 MenuPage: Ürün sepete ekleniyor:', item.name);
     addToCart(item);
+    console.log('📱 MenuPage: addToCart hook çağrıldı');
     setNotification(`${item.name} hozzáadva a kosárhoz!`);
     setTimeout(() => setNotification(null), 3000);
+    console.log('🔔 MenuPage: Bildirim gösterildi');
   };
 
   return (
@@ -48,12 +51,12 @@ const MenuPage: React.FC = () => {
           <div className="flex items-center justify-center gap-4 mb-4">
             <img 
               src="/logo.svg" 
-              alt="Karagöz Döner Maxi Logo" 
+              alt="Karagöz Döner Logo" 
               className="w-16 h-16 md:w-20 md:h-20"
             />
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                Karagöz Döner Maxi
+                Karagöz Döner
               </h1>
               <p className="text-xl opacity-90">
                 Autentikus török konyha • Magyarország

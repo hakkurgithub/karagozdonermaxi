@@ -109,7 +109,7 @@ export default function ContactPage() {
             <div className="flex items-center justify-center gap-4 mb-4">
               <img 
                 src="/logo.svg" 
-                alt="Karagöz Döner Maxi Logo" 
+                alt="Karagöz Döner Logo" 
                 className="w-20 h-20"
               />
             </div>

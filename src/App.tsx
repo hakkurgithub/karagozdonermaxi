@@ -6,6 +6,7 @@ import CartPage from './pages/CartPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMenuManagement from './pages/AdminMenuManagement';
+import { CartProvider } from './context/CartContext';
 import './App.css';
 
 function App() {
@@ -61,21 +62,23 @@ function App() {
   }, [navigateTo]);
 
   return (
-    <div className="App">
-      {currentPage === 'contact' ? (
-        <ContactPage />
-      ) : currentPage === 'cart' ? (
-        <CartPage />
-      ) : currentPage === 'admin-login' ? (
-        <AdminLogin onLoginSuccess={() => navigateTo('admin-dashboard')} />
-      ) : currentPage === 'admin-dashboard' ? (
-        <AdminDashboard />
-      ) : currentPage === 'admin-menu' ? (
-        <AdminMenuManagement />
-      ) : (
-        <MenuPage />
-      )}
-    </div>
+    <CartProvider>
+      <div className="App">
+        {currentPage === 'contact' ? (
+          <ContactPage />
+        ) : currentPage === 'cart' ? (
+          <CartPage />
+        ) : currentPage === 'admin-login' ? (
+          <AdminLogin onLoginSuccess={() => navigateTo('admin-dashboard')} />
+        ) : currentPage === 'admin-dashboard' ? (
+          <AdminDashboard />
+        ) : currentPage === 'admin-menu' ? (
+          <AdminMenuManagement />
+        ) : (
+          <MenuPage />
+        )}
+      </div>
+    </CartProvider>
   );
 }
 

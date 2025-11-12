@@ -62,7 +62,7 @@ const AdminDashboard: React.FC = () => {
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Yönetim Paneli</h1>
-                <p className="text-sm text-gray-600">Karagöz Döner Maxi</p>
+                <p className="text-sm text-gray-600">Karagöz Döner</p>
               </div>
             </div>
             <div className="flex items-center gap-4">

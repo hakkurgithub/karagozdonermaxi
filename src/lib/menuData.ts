@@ -1,32 +1,8 @@
 // lib/menuData.ts
+import { MenuItem } from '../types/menu';
 
 // === DİL GÜNCELLEMESİ (Kategoriler Macarcaya çevrildi) ===
 // === YENİ KATEGORİLER EKLENDİ (Wix siteden) ===
-export type MenuCategory =
-  | "Kebapok és Grillek"
-  | "Pide és Lahmacun"
-  | "Döner"
-  | "Dürüm"
-  | "Levesek"
-  | "Köretek"
-  | "Desszertek"
-  | "Italok"
-  | "Gyros tálak"
-  | "Hamburgerek"
-  | "Gyros piták"
-  | "Saláták"
-  | "Tészták"
-  | "Közkedvelt ételek";
-
-export interface MenuItem {
-  id: string;
-  name: string;
-  price: number; // Artık Ft (tam sayı)
-  description: string;
-  category: MenuCategory;
-  image: string;
-  rating: number;
-}
 
 // === DİL, FİYAT (x10) VE YENİ ÜRÜNLER (Wix) GÜNCELLENDİ ===
 // === SÖZDİZİMİ HATASI (fazladan '}') DÜZELTİLDİ ===
