@@ -110,6 +110,32 @@ npm run build
 npm run preview
 ```
 
+## 🚀 Vercel'e Deploy
+
+### Otomatik Deploy:
+1. **Vercel hesabı açın**: [vercel.com](https://vercel.com)
+2. **GitHub ile bağlayın**: Repository'yi import edin
+3. **Otomatik deploy**: Her push otomatik olarak deploy edilir
+
+### Manuel Deploy:
+```bash
+# Vercel CLI yükle
+npm i -g vercel
+
+# Deploy et
+vercel --prod
+```
+
+### Environment Variables:
+Vercel dashboard'da şu değişkenleri ekleyin:
+```
+VITE_ADMIN_USERNAME=admin
+VITE_ADMIN_PASSWORD=your_secure_password
+```
+
+### Deploy URL:
+🌐 **Live Demo**: [https://karagozdonermaxi.vercel.app](https://karagozdonermaxi.vercel.app)
+
 ## 💻 Kullanılan Teknolojiler
 
 - **React 18**: Modern React özellikleri
