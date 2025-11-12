@@ -35,7 +35,41 @@
     <title>Karagöz Döner - Autentikus török konyha</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Loading fallback -->
+      <div id="loading-fallback" style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Inter, sans-serif;">
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+          <h2 style="color: #374151; margin: 0;">Karagöz Döner Maxi</h2>
+          <p style="color: #6b7280; margin: 10px 0 0;">Yükleniyor...</p>
+        </div>
+      </div>
+    </div>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <script>
+      // Error handling
+      window.addEventListener('error', function(e) {
+        console.error('Script error:', e);
+        document.getElementById('loading-fallback').innerHTML = 
+          '<div style="text-align: center; color: #dc2626;"><h2>Bir hata oluştu</h2><p>Sayfa yüklenirken bir sorun yaşandı. Lütfen sayfayı yenileyin.</p><button onclick="location.reload()" style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Sayfayı Yenile</button></div>';
+      });
+
+      // React loaded successfully, hide fallback
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const fallback = document.getElementById('loading-fallback');
+          const root = document.getElementById('root');
+          if (root && root.children.length > 1) {
+            fallback.style.display = 'none';
+          }
+        }, 3000); // 3 saniye sonra fallback'i gizle
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
